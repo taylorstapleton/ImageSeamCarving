@@ -22,6 +22,7 @@ using System.Net.Cache;
 
 namespace SeamCarving
 {
+    /// new comment for commit
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
