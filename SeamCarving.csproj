@@ -66,6 +66,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Classes\FileChooser.cs" />
+    <Compile Include="Classes\SeamCarvingContext.cs" />
     <Compile Include="Interfaces\IFileChooser.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
