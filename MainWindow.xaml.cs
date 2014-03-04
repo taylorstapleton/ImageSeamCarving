@@ -43,6 +43,11 @@ namespace SeamCarving
             InitializeComponent();
         }
 
+        /// <summary>
+        /// on choose file button clicked
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             IFileChooser fileChooser = new FileChooser();
@@ -50,31 +55,71 @@ namespace SeamCarving
 
             if (fileChooser.getFile(out path) == true)
             {
-                BitmapImage bitmap = new BitmapImage();
-                bitmap.CacheOption = BitmapCacheOption.None;
-                bitmap.UriCachePolicy = new RequestCachePolicy(RequestCacheLevel.BypassCache);
-                bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                bitmap.CreateOptions = BitmapCreateOptions.IgnoreImageCache;
-                bitmap.BeginInit();
-                bitmap.UriSource = new Uri(path);
-                bitmap.EndInit();
-
-                Application.Current.MainWindow.Height = bitmap.Height;
-                Application.Current.MainWindow.Width = bitmap.Width + 200;
-
-                ImageControl.Height = bitmap.Height;
-                ImageControl.Width = bitmap.Width;
+                BitmapImage bitmap = createBitmapFromFilePath(path);
 
                 imageDataArray = ImageToByte(bitmap);
+
                 display(imageDataArray, (int)bitmap.Width, (int)bitmap.Height);
             }
         }
 
+        /// <summary>
+        /// on gradient button clicked
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
             calculateGradient();
             display(gradientArray, (int)ImageControl.Width, (int)ImageControl.Height);
         }
+
+        /// <summary>
+        /// on heat map button clicked
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Button_Click_2(object sender, RoutedEventArgs e)
+        {
+            calculateHeat();
+            display(energyArray, (int)ImageControl.Width, (int)ImageControl.Height);
+        }
+
+        /// <summary>
+        /// on seam carve button clicked
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Button_Click_3(object sender, RoutedEventArgs e)
+        {
+            //for (int i = 0; i < 3; i++)
+            //{
+            calculateGradient();
+            calculateHeat();
+            calculateSeam();
+            display(imageDataArray, (int)ImageControl.Width, (int)ImageControl.Height);
+            resize();
+            //}
+        }
+
+        /// <summary>
+        /// creates a bitmap image with the proper options set from the provided path
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        private BitmapImage createBitmapFromFilePath(string path)
+        {
+            BitmapImage bitmap = new BitmapImage();
+            bitmap.CacheOption = BitmapCacheOption.None;
+            bitmap.UriCachePolicy = new RequestCachePolicy(RequestCacheLevel.BypassCache);
+            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+            bitmap.CreateOptions = BitmapCreateOptions.IgnoreImageCache;
+            bitmap.BeginInit();
+            bitmap.UriSource = new Uri(path);
+            bitmap.EndInit();
+            return bitmap;
+        }
+
 
         public void calculateGradient()
         {
@@ -189,11 +234,7 @@ namespace SeamCarving
             
         }
 
-        private void Button_Click_2(object sender, RoutedEventArgs e)
-        {
-            calculateHeat();
-            display(energyArray, (int)ImageControl.Width, (int)ImageControl.Height);
-        }
+        
 
         public void calculateHeat()
         {
@@ -248,17 +289,7 @@ namespace SeamCarving
             return arr[index];
         }
 
-        private void Button_Click_3(object sender, RoutedEventArgs e)
-        {
-            //for (int i = 0; i < 3; i++)
-            //{
-                calculateGradient();
-                calculateHeat();
-                calculateSeam();
-                display(imageDataArray, (int)ImageControl.Width, (int)ImageControl.Height);
-                resize();
-            //}
-        }
+        
 
         public void resize()
         {
