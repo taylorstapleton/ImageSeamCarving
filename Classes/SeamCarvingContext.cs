@@ -7,7 +7,7 @@ using System.Windows.Media.Imaging;
 
 namespace SeamCarving.Classes
 {
-    class SeamCarvingContext
+    public class SeamCarvingContext
     {
         /// <summary>
         /// current image data
@@ -42,7 +42,9 @@ namespace SeamCarving.Classes
         /// </summary>
         public int stride;
 
-
+        /// <summary>
+        /// storage for the new bitmap image to be resized.
+        /// </summary>
         public BitmapImage newBitmapImage;
     }
 }
