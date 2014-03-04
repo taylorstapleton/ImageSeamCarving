@@ -19,6 +19,8 @@ using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Net.Cache;
+using SeamCarving.Interfaces;
+using SeamCarving.Classes;
 
 namespace SeamCarving
 {
@@ -35,6 +37,7 @@ namespace SeamCarving
         int[] dirtyArray;
         int[] energy;
         int stride;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -42,15 +45,11 @@ namespace SeamCarving
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog fileChooser = new OpenFileDialog();
-            string path;
+            IFileChooser fileChooser = new FileChooser();
+            string path = string.Empty;
 
-            fileChooser.Multiselect = false;
-
-            if (fileChooser.ShowDialog() == true)
+            if (fileChooser.getFile(out path) == true)
             {
-                path = fileChooser.FileName;
-
                 BitmapImage bitmap = new BitmapImage();
                 bitmap.CacheOption = BitmapCacheOption.None;
                 bitmap.UriCachePolicy = new RequestCachePolicy(RequestCacheLevel.BypassCache);
