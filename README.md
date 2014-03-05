@@ -14,6 +14,7 @@ This application is built for carving image seams through a process of:
 
 
 code structure is as follows:
+
 1. The main driver code lives in MainWindow.xaml.cs
 2. classes live in the classes folder
 3. interfaces live in the interfaces folder
