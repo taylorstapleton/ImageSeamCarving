@@ -18,6 +18,12 @@ namespace SeamCarving.Interfaces
 
         BitmapImage createBitmapFromFilePath(string path);
 
-        byte[] ImageToByte(BitmapImage toCopy, SeamCarvingContext injectedContext)
+        byte[] ImageToByte(BitmapImage toCopy, SeamCarvingContext injectedContext);
+
+        int findMinIndex(int[] arr, SeamCarvingContext injectedContext);
+
+        int getIndex(int[] arr, int x, int y, SeamCarvingContext injectedContext);
+
+        void setIndex(int[] arr, int x, int y, int toSet, SeamCarvingContext injectedContext);
     }
 }

@@ -81,7 +81,7 @@ namespace SeamCarving.Classes
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
-        private BitmapImage createBitmapFromFilePath(string path)
+        public BitmapImage createBitmapFromFilePath(string path)
         {
             BitmapImage bitmap = new BitmapImage();
             bitmap.CacheOption = BitmapCacheOption.None;
@@ -107,6 +107,56 @@ namespace SeamCarving.Classes
             byte[] pixels = new byte[size];
             toCopy.CopyPixels(pixels, injectedContext.stride, 0);
             return pixels;
+        }
+
+        /// <summary>
+        /// find the minimum index in the right most column of a two dimensional array represented as a one dimensional array
+        /// </summary>
+        /// <param name="arr"></param>
+        /// <param name="injectedContext"></param>
+        /// <returns></returns>
+        public int findMinIndex(int[] arr, SeamCarvingContext injectedContext)
+        {
+            int lowest = Int32.MaxValue;
+            int toReturn = 0;
+            for (int i = 0; i < injectedContext.Height; i++)
+            {
+                int current = this.getIndex(arr, i, (int)injectedContext.Width - 2, injectedContext);
+                if (current < lowest)
+                {
+                    lowest = current;
+                    toReturn = i;
+                }
+            }
+            return toReturn;
+        }
+
+        /// <summary>
+        /// set index of pixel in array
+        /// </summary>
+        /// <param name="arr"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="toSet"></param>
+        /// <param name="injectedContext"></param>
+        public void setIndex(int[] arr, int x, int y, int toSet, SeamCarvingContext injectedContext)
+        {
+            int index = x * (int)injectedContext.Width + y;
+            arr[index] = toSet;
+        }
+
+        /// <summary>
+        /// get index form the given array.
+        /// </summary>
+        /// <param name="arr"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="injectedContext"></param>
+        /// <returns></returns>
+        public int getIndex(int[] arr, int x, int y, SeamCarvingContext injectedContext)
+        {
+            int index = x * (int)injectedContext.Width + y;
+            return arr[index];
         }
     }
 }
