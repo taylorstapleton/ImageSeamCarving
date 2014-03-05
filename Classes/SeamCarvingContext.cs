@@ -46,5 +46,15 @@ namespace SeamCarving.Classes
         /// storage for the new bitmap image to be resized.
         /// </summary>
         public BitmapImage newBitmapImage;
+
+        /// <summary>
+        /// Height of the current scenario
+        /// </summary>
+        public double Height;
+
+        /// <summary>
+        /// Width of the current scenario
+        /// </summary>
+        public double Width;
     }
 }

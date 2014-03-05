@@ -30,12 +30,18 @@ namespace SeamCarving
     /// </summary>
     public partial class MainWindow : Window
     {
-        SeamCarvingContext context;
+        private SeamCarvingContext context;
+        private ISeamUtilities seamUtilities;
 
         public MainWindow()
         {
             InitializeComponent();
             context = new SeamCarvingContext();
+
+            context.Height = ImageControl.Height;
+            context.Width = ImageControl.Width;
+
+            seamUtilities = new SeamUtilities();
         }
 
         /// <summary>
@@ -51,6 +57,9 @@ namespace SeamCarving
             if (fileChooser.getFile(out path) == true)
             {
                 BitmapImage bitmap = createBitmapFromFilePath(path);
+
+                context.Height = bitmap.PixelHeight;
+                context.Width = bitmap.PixelWidth;
 
                 context.imageDataArray = ImageToByte(bitmap, context);
 
@@ -115,7 +124,10 @@ namespace SeamCarving
             return bitmap;
         }
 
-
+        /// <summary>
+        /// given a seam carving context, calculates the gradient of every pixel.
+        /// </summary>
+        /// <param name="injectedContext"></param>
         public void calculateGradient(SeamCarvingContext injectedContext)
         {
             injectedContext.gradientArray = new byte[injectedContext.imageDataArray.Length];
@@ -123,41 +135,45 @@ namespace SeamCarving
             {
                 for (int j = 1; j < ImageControl.Width - 1; j++)
                 {
-                    pixel last = getPixelInfo(i, j - 1, injectedContext.imageDataArray);
-                    pixel current = getPixelInfo(i, j, injectedContext.imageDataArray);
-                    pixel next = getPixelInfo(i, j + 1, injectedContext.imageDataArray);
+                    pixel last = getPixelInfo(i, j - 1, injectedContext.imageDataArray, injectedContext);
+                    pixel current = getPixelInfo(i, j, injectedContext.imageDataArray, injectedContext);
+                    pixel next = getPixelInfo(i, j + 1, injectedContext.imageDataArray, injectedContext);
 
-                    byte gradient = (byte)((((current.red - next.red + 1) * (current.blue - next.blue + 1) * (current.green - next.green + 1)) + last.red) / 128);
+                    byte gradient = calculateGradientOfPixel(last, current, next);
 
-                    byte[] bytes = BitConverter.GetBytes(gradient);
-
-                    setPixel(injectedContext.gradientArray, i, j, 0, gradient);
-                    setPixel(injectedContext.gradientArray, i, j, 1, gradient);
-                    setPixel(injectedContext.gradientArray, i, j, 2, gradient);
-                    setPixel(injectedContext.gradientArray, i, j, 3, 0xff);
+                    seamUtilities.setPixel(injectedContext.gradientArray, i, j, 0, gradient, context);
+                    seamUtilities.setPixel(injectedContext.gradientArray, i, j, 1, gradient, context);
+                    seamUtilities.setPixel(injectedContext.gradientArray, i, j, 2, gradient, context);
+                    seamUtilities.setPixel(injectedContext.gradientArray, i, j, 3, 0xff, context);
                 }
             }
         }
 
-        public byte[] ImageToByte(BitmapImage img, SeamCarvingContext injectedContext)
+        /// <summary>
+        /// takes three pixels and calculates the current pixels difference from the pixels next to it.
+        /// </summary>
+        /// <param name="last"></param>
+        /// <param name="current"></param>
+        /// <param name="next"></param>
+        /// <returns></returns>
+        public byte calculateGradientOfPixel(pixel last, pixel current, pixel next)
         {
-            injectedContext.stride = img.PixelWidth * 4;
-            int size = img.PixelHeight * injectedContext.stride;
+            return (byte)((((current.red - next.red + 1) * (current.blue - next.blue + 1) * (current.green - next.green + 1)) + last.red) / 128);
+        }
+
+        /// <summary>
+        /// takes a given bitmapImage and copies it into a new byte array and returns it.
+        /// </summary>
+        /// <param name="img"></param>
+        /// <param name="injectedContext"></param>
+        /// <returns></returns>
+        public byte[] ImageToByte(BitmapImage toCopy, SeamCarvingContext injectedContext)
+        {
+            injectedContext.stride = toCopy.PixelWidth * 4;
+            int size = toCopy.PixelHeight * injectedContext.stride;
             byte[] pixels = new byte[size];
-            img.CopyPixels(pixels, injectedContext.stride, 0);
+            toCopy.CopyPixels(pixels, injectedContext.stride, 0);
             return pixels;
-        }
-
-        public byte getPixel(byte[] arr, int x, int y, int color)
-        {
-            int index = (int)ImageControl.Width * 4 * x + y * 4;
-            return arr[index + color];
-        }
-
-        public void setPixel(byte[] arr, int x, int y, int color , byte toSet)
-        {
-            int index = (int)ImageControl.Width * 4 * x + y * 4;
-            arr[index + color] = toSet;
         }
 
         public void display(byte[] toDisplay, int width, int height, SeamCarvingContext injectedContext)
@@ -187,12 +203,12 @@ namespace SeamCarving
 
         }
 
-        public pixel getPixelInfo(int i, int j,  byte[] imageDataArray)
+        public pixel getPixelInfo(int i, int j, byte[] imageDataArray, SeamCarvingContext injectedContext)
         {
-                    byte[] red = {0,0,0,getPixel(imageDataArray, i, j, 0)};
-                    byte[] green = {0,0,0,getPixel(imageDataArray, i, j, 1)};
-                    byte[] blue = {0,0,0,getPixel(imageDataArray, i, j, 2)};
-                    byte[] alpha = {0,0,0,getPixel(imageDataArray, i, j, 3)};
+                    byte[] red = {0,0,0, seamUtilities.getPixel(imageDataArray, i, j, 0, injectedContext)};
+                    byte[] green = {0,0,0, seamUtilities.getPixel(imageDataArray, i, j, 1, injectedContext)};
+                    byte[] blue = {0,0,0, seamUtilities.getPixel(imageDataArray, i, j, 2, injectedContext)};
+                    byte[] alpha = {0,0,0, seamUtilities.getPixel(imageDataArray, i, j, 3, injectedContext)};
 
                     if (BitConverter.IsLittleEndian)
                     {
@@ -218,11 +234,11 @@ namespace SeamCarving
 
         public void calculateHeat(SeamCarvingContext injectedContext)
         {
-            injectedContext.energyArray = context.gradientArray;
+            injectedContext.energyArray = injectedContext.gradientArray;
             injectedContext.energy = new int[injectedContext.gradientArray.Length / 4];
             for (int i = 0; i < ImageControl.Height; i++)
             {
-                byte current = getPixel(injectedContext.gradientArray, i, 0, 0);
+                byte current = seamUtilities.getPixel(injectedContext.gradientArray, i, 0, 0, injectedContext);
                 setIndex(injectedContext.energy, i, 0, (int)current);
             }
 
@@ -236,7 +252,7 @@ namespace SeamCarving
                     }
                     else
                     {
-                        int current = (int)getPixel(injectedContext.gradientArray, j, i, 0);
+                        int current = (int)seamUtilities.getPixel(injectedContext.gradientArray, j, i, 0, injectedContext);
                         int neg = getIndex(injectedContext.energy, j - 1, i - 1);
                         int lat = getIndex(injectedContext.energy, j, i - 1);
                         int pos = getIndex(injectedContext.energy, j + 1, i - 1);
@@ -249,9 +265,9 @@ namespace SeamCarving
 
                         byte pixelValue = (byte)(ratio * 256);
 
-                        setPixel(injectedContext.energyArray, j, i, 0, pixelValue);
-                        setPixel(injectedContext.energyArray, j, i, 1, pixelValue);
-                        setPixel(injectedContext.energyArray, j, i, 2, pixelValue);
+                        seamUtilities.setPixel(injectedContext.energyArray, j, i, 0, pixelValue, injectedContext);
+                        seamUtilities.setPixel(injectedContext.energyArray, j, i, 1, pixelValue, injectedContext);
+                        seamUtilities.setPixel(injectedContext.energyArray, j, i, 2, pixelValue, injectedContext);
                     }
                 }
             }
@@ -286,7 +302,7 @@ namespace SeamCarving
                     {
                         for (int k = 0; k < 4; k++)
                         {
-                            setPixel(newImage, f - encountered, i, k, getPixel(injectedContext.imageDataArray, f, i, k));
+                            seamUtilities.setPixel(newImage, f - encountered, i, k, seamUtilities.getPixel(injectedContext.imageDataArray, f, i, k, injectedContext), injectedContext);
                         }
                     }
                     else
@@ -316,28 +332,28 @@ namespace SeamCarving
 
                 if (up < lat && up < down)
                 {
-                    setPixel(injectedContext.imageDataArray, j, i, 2, 0xff);
-                    setPixel(injectedContext.imageDataArray, j, i, 1, 0x00);
-                    setPixel(injectedContext.imageDataArray, j, i, 0, 0x00);
-                    setPixel(injectedContext.imageDataArray, j, i, 3, 0xff);
+                    seamUtilities.setPixel(injectedContext.imageDataArray, j, i, 2, 0xff, injectedContext);
+                    seamUtilities.setPixel(injectedContext.imageDataArray, j, i, 1, 0x00, injectedContext);
+                    seamUtilities.setPixel(injectedContext.imageDataArray, j, i, 0, 0x00, injectedContext);
+                    seamUtilities.setPixel(injectedContext.imageDataArray, j, i, 3, 0xff, injectedContext);
                     setIndex(injectedContext.dirtyArray, j, i, 1);
                     j = j + 1;
                 }
                 else if (lat < down && lat < up)
                 {
-                    setPixel(injectedContext.imageDataArray, j, i, 2, 0xff);
-                    setPixel(injectedContext.imageDataArray, j, i, 1, 0x00);
-                    setPixel(injectedContext.imageDataArray, j, i, 3, 0xff);
-                    setPixel(injectedContext.imageDataArray, j, i, 0, 0x00);
+                    seamUtilities.setPixel(injectedContext.imageDataArray, j, i, 2, 0xff, injectedContext);
+                    seamUtilities.setPixel(injectedContext.imageDataArray, j, i, 1, 0x00, injectedContext);
+                    seamUtilities.setPixel(injectedContext.imageDataArray, j, i, 3, 0xff, injectedContext);
+                    seamUtilities.setPixel(injectedContext.imageDataArray, j, i, 0, 0x00, injectedContext);
                     setIndex(injectedContext.dirtyArray, j, i, 1);
                     j = j;
                 }
                 else
                 {
-                    setPixel(injectedContext.imageDataArray, j, i, 2, 0xff);
-                    setPixel(injectedContext.imageDataArray, j, i, 3, 0xff);
-                    setPixel(injectedContext.imageDataArray, j, i, 1, 0x00);
-                    setPixel(injectedContext.imageDataArray, j, i, 0, 0x00);
+                    seamUtilities.setPixel(injectedContext.imageDataArray, j, i, 2, 0xff, injectedContext);
+                    seamUtilities.setPixel(injectedContext.imageDataArray, j, i, 3, 0xff, injectedContext);
+                    seamUtilities.setPixel(injectedContext.imageDataArray, j, i, 1, 0x00, injectedContext);
+                    seamUtilities.setPixel(injectedContext.imageDataArray, j, i, 0, 0x00, injectedContext);
                     setIndex(injectedContext.dirtyArray, j, i, 1);
                     j = j - 1;
                 }
