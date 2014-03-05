@@ -11,6 +11,7 @@ namespace SeamCarving.Classes
 {
     public class SeamUtilities : ISeamUtilities
     {
+        #region pixel get, set, info methods
         /// <summary>
         /// sets the pixel value in the given byte array at location (x,y) with the given color to the given value.
         /// </summary>
@@ -75,7 +76,9 @@ namespace SeamCarving.Classes
 
             return toReturn;
         }
+        #endregion
 
+        #region bitmap methods
         /// <summary>
         /// creates a bitmap image with the proper options set from the provided path
         /// </summary>
@@ -108,7 +111,9 @@ namespace SeamCarving.Classes
             toCopy.CopyPixels(pixels, injectedContext.stride, 0);
             return pixels;
         }
+#endregion
 
+        #region array indexing methods
         /// <summary>
         /// find the minimum index in the right most column of a two dimensional array represented as a one dimensional array
         /// </summary>
@@ -158,5 +163,6 @@ namespace SeamCarving.Classes
             int index = x * (int)injectedContext.Width + y;
             return arr[index];
         }
+        #endregion
     }
 }

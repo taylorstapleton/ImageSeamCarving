@@ -9,8 +9,14 @@ namespace SeamCarving.Classes
 {
     class GradientCalculator : IGradientCalculator
     {
+        #region class variables
+        /// <summary>
+        /// seam utils
+        /// </summary>
         ISeamUtilities seamUtilities;
+        #endregion
 
+        #region constructor
         /// <summary>
         /// constructor
         /// </summary>
@@ -19,7 +25,9 @@ namespace SeamCarving.Classes
         {
             this.seamUtilities = injectedSeamUtilities;
         }
+        #endregion
 
+        #region gradient methods
         /// <summary>
         /// given a seam carving context, calculates the gradient of every pixel.
         /// </summary>
@@ -56,5 +64,6 @@ namespace SeamCarving.Classes
         {
             return (byte)((((current.red - next.red + 1) * (current.blue - next.blue + 1) * (current.green - next.green + 1)) + last.red) / 128);
         }
+        #endregion
     }
 }

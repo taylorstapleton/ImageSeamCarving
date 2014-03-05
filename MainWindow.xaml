@@ -12,10 +12,12 @@
             </Image.RenderTransform>
 
         </Image>
-        <Button Content="Choose File" Margin="0,14,10,0" VerticalAlignment="Top" Click="Button_Click" HorizontalAlignment="Right" Width="112"/>
-        <Button Content="Gradient" Margin="0,41,10,0" VerticalAlignment="Top" Click="Button_Click_1" HorizontalAlignment="Right" Width="112" RenderTransformOrigin="0.464,-5.308"/>
-        <Button Content="Dynamic Heat" Margin="0,68,10,0" RenderTransformOrigin="-0.013,1.361" Click="Button_Click_2" HorizontalAlignment="Right" Width="112" Height="22" VerticalAlignment="Top"/>
-        <Button Content="Carve" HorizontalAlignment="Right" Margin="0,95,10,0" VerticalAlignment="Top" Width="112" Click="Button_Click_3"/>
+        <Button Content="Choose File" Margin="0,15,35,0" VerticalAlignment="Top" Click="Button_Click" HorizontalAlignment="Right" Width="112"/>
+        <Button Content="Gradient" Margin="0,42,35,0" VerticalAlignment="Top" Click="Button_Click_1" HorizontalAlignment="Right" Width="112" RenderTransformOrigin="0.464,-5.308"/>
+        <Button Content="Dynamic Heat" Margin="0,69,35,0" RenderTransformOrigin="-0.013,1.361" Click="Button_Click_2" HorizontalAlignment="Right" Width="112" Height="22" VerticalAlignment="Top"/>
+        <Button Content="Carve" HorizontalAlignment="Right" Margin="0,96,35,0" VerticalAlignment="Top" Width="112" Click="Button_Click_3"/>
+        <TextBox x:Name="TextBox1" Height="23" Margin="0,206,35,0" TextWrapping="Wrap" Text="1" VerticalAlignment="Top" HorizontalAlignment="Right" Width="110" RenderTransformOrigin="0.5,4.304"/>
+        <Label Content="Number of seams to carve&#xD;&#xA;              per click" Margin="0,159,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="158"/>
 
     </Grid>
 </Window>

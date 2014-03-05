@@ -24,17 +24,23 @@ using SeamCarving.Classes;
 
 namespace SeamCarving
 {
-    /// new comment for commit
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
+        #region class variables
         private SeamCarvingContext context;
         private ISeamUtilities seamUtilities;
         private IGradientCalculator gradientCalculator;
         private IHeatCalculator heatCalculator;
+        private ISeamCalculator seamCalculator;
+        #endregion
 
+        #region constructor
+        /// <summary>
+        /// constructor
+        /// </summary>
         public MainWindow()
         {
             InitializeComponent();
@@ -46,8 +52,11 @@ namespace SeamCarving
             this.seamUtilities = new SeamUtilities();
             this.gradientCalculator = new GradientCalculator(seamUtilities);
             this.heatCalculator = new HeatCalculator(seamUtilities);
+            this.seamCalculator = new SeamCalculator(seamUtilities);
         }
+        #endregion
 
+        #region Button Click Handlers
         /// <summary>
         /// on choose file button clicked
         /// </summary>
@@ -82,6 +91,7 @@ namespace SeamCarving
             display(context.gradientArray, (int)ImageControl.Width, (int)ImageControl.Height, context);
             var test = context.gradientArray.Max();
         }
+        
 
         /// <summary>
         /// on heat map button clicked
@@ -101,16 +111,28 @@ namespace SeamCarving
         /// <param name="e"></param>
         private void Button_Click_3(object sender, RoutedEventArgs e)
         {
-            this.gradientCalculator.calculateGradient(context);
-            this.heatCalculator.calculateHeat(context);
-            calculateSeam(context);
-            display(context.imageDataArray, (int)ImageControl.Width, (int)ImageControl.Height, context);
-            resize(context);
-            context.Height--;
+            if (!string.IsNullOrWhiteSpace(TextBox1.Text))
+            {
+                int seamsToCarve = Int32.Parse(TextBox1.Text);
+
+                for (int i = 0; i < seamsToCarve; i++)
+                {
+                    this.gradientCalculator.calculateGradient(context);
+                    this.heatCalculator.calculateHeat(context);
+                    this.seamCalculator.calculateSeam(context);
+                    display(context.imageDataArray, (int)ImageControl.Width, (int)ImageControl.Height, context);
+                    resize(context);
+                    context.Height--;
+                }
+            }
         }
+        #endregion
 
-
-
+        #region resize and display methods
+        /// <summary>
+        /// once the seam has been calculated, we use this method to shrink the array and remove the unwanted pixels.
+        /// </summary>
+        /// <param name="injectedContext"></param>
         public void resize(SeamCarvingContext injectedContext)
         {
             int newSize = ((int)ImageControl.Width - 1) * ((int)ImageControl.Height) * 4;
@@ -139,55 +161,13 @@ namespace SeamCarving
             injectedContext.imageDataArray = newImage;
         }
 
-        public void calculateSeam(SeamCarvingContext injectedContext)
-        {
-            injectedContext.dirtyArray = new int[injectedContext.energy.Length];
-
-            int j = this.seamUtilities.findMinIndex(injectedContext.energy, injectedContext);
-            for (int i = (int)ImageControl.Width - 2; i >= 0; i--)
-            {
-                if (j == 0)
-                {
-                    j += 1;
-                }
-                int up = this.seamUtilities.getIndex(injectedContext.energy, j + 1, i, injectedContext);
-                int lat = this.seamUtilities.getIndex(injectedContext.energy, j, i, injectedContext);
-                int down = this.seamUtilities.getIndex(injectedContext.energy, j - 1, i, injectedContext);
-
-                if (up < lat && up < down)
-                {
-                    seamUtilities.setPixel(injectedContext.imageDataArray, j, i, 2, 0xff, injectedContext);
-                    seamUtilities.setPixel(injectedContext.imageDataArray, j, i, 1, 0x00, injectedContext);
-                    seamUtilities.setPixel(injectedContext.imageDataArray, j, i, 0, 0x00, injectedContext);
-                    seamUtilities.setPixel(injectedContext.imageDataArray, j, i, 3, 0xff, injectedContext);
-                    this.seamUtilities.setIndex(injectedContext.dirtyArray, j, i, 1, injectedContext);
-                    j = j + 1;
-                }
-                else if (lat < down && lat < up)
-                {
-                    seamUtilities.setPixel(injectedContext.imageDataArray, j, i, 2, 0xff, injectedContext);
-                    seamUtilities.setPixel(injectedContext.imageDataArray, j, i, 1, 0x00, injectedContext);
-                    seamUtilities.setPixel(injectedContext.imageDataArray, j, i, 3, 0xff, injectedContext);
-                    seamUtilities.setPixel(injectedContext.imageDataArray, j, i, 0, 0x00, injectedContext);
-                    this.seamUtilities.setIndex(injectedContext.dirtyArray, j, i, 1, injectedContext);
-                    j = j;
-                }
-                else
-                {
-                    seamUtilities.setPixel(injectedContext.imageDataArray, j, i, 2, 0xff, injectedContext);
-                    seamUtilities.setPixel(injectedContext.imageDataArray, j, i, 3, 0xff, injectedContext);
-                    seamUtilities.setPixel(injectedContext.imageDataArray, j, i, 1, 0x00, injectedContext);
-                    seamUtilities.setPixel(injectedContext.imageDataArray, j, i, 0, 0x00, injectedContext);
-                    this.seamUtilities.setIndex(injectedContext.dirtyArray, j, i, 1, injectedContext);
-                    j = j - 1;
-                }
-            }
-        }
-
-        
-
-
-
+        /// <summary>
+        /// takes in a byte array and a seam context and displays it to the application window as an image.
+        /// </summary>
+        /// <param name="toDisplay"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <param name="injectedContext"></param>
         public void display(byte[] toDisplay, int width, int height, SeamCarvingContext injectedContext)
         {
             Bitmap newBitmap = new Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
@@ -213,5 +193,19 @@ namespace SeamCarving
             ImageControl.Height = height;
             ImageControl.Source = injectedContext.newBitmapImage;
         }
+        #endregion
+
+        #region textbox methods
+        protected override void OnPreviewTextInput(TextCompositionEventArgs e)
+        {
+            char c = Convert.ToChar(e.Text);
+            if (Char.IsNumber(c))
+                e.Handled = false;
+            else
+                e.Handled = true;
+
+            base.OnPreviewTextInput(e);
+        }
+        #endregion
     }
 }

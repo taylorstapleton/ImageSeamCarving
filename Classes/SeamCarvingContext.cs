@@ -9,6 +9,7 @@ namespace SeamCarving.Classes
 {
     public class SeamCarvingContext
     {
+        #region class variables
         /// <summary>
         /// current image data
         /// meant to be 4 bytes per pixel
@@ -56,5 +57,6 @@ namespace SeamCarving.Classes
         /// Width of the current scenario
         /// </summary>
         public double Width;
+        #endregion
     }
 }

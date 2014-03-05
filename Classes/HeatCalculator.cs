@@ -9,7 +9,14 @@ namespace SeamCarving.Classes
 {
     class HeatCalculator : IHeatCalculator
     {
+        #region class variables
+        /// <summary>
+        /// seam utils
+        /// </summary>
         ISeamUtilities seamUtilities;
+        #endregion
+
+        #region constructor
         /// <summary>
         /// constructor
         /// </summary>
@@ -18,7 +25,9 @@ namespace SeamCarving.Classes
         {
             this.seamUtilities = injectedUtilities;
         }
+        #endregion
 
+        #region heat calculation methods
         /// <summary>
         /// calculates the heatmap of the given seam carving context
         /// </summary>
@@ -63,5 +72,6 @@ namespace SeamCarving.Classes
                 }
             }
         }
+        #endregion
     }
 }

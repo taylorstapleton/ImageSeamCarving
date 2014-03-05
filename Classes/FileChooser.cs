@@ -10,11 +10,14 @@ namespace SeamCarving.Classes
 {
     public class FileChooser : IFileChooser
     {
+        #region class variabels
         /// <summary>
         /// system FileDialog hook
         /// </summary>
         private OpenFileDialog fileDialog;
+        #endregion
 
+        #region constructor
         /// <summary>
         /// constructor
         /// </summary>
@@ -23,7 +26,9 @@ namespace SeamCarving.Classes
             fileDialog = new OpenFileDialog();
             fileDialog.Multiselect = false;
         }
+        #endregion
 
+        #region file methods
         /// <summary>
         /// used to choose a file
         /// </summary>
@@ -39,5 +44,6 @@ namespace SeamCarving.Classes
             path = string.Empty;
             return false;
         }
+        #endregion
     }
 }
