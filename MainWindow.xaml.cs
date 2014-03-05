@@ -58,12 +58,12 @@ namespace SeamCarving
 
             if (fileChooser.getFile(out path) == true)
             {
-                BitmapImage bitmap = createBitmapFromFilePath(path);
+                BitmapImage bitmap = this.seamUtilities.createBitmapFromFilePath(path);
 
-                context.Height = bitmap.PixelHeight;
-                context.Width = bitmap.PixelWidth;
+                this.context.Height = bitmap.PixelHeight;
+                this.context.Width = bitmap.PixelWidth;
 
-                context.imageDataArray = ImageToByte(bitmap, context);
+                this.context.imageDataArray = this.seamUtilities.ImageToByte(bitmap, context);
 
                 display(context.imageDataArray, (int)bitmap.Width, (int)bitmap.Height, context);
             }
@@ -104,41 +104,6 @@ namespace SeamCarving
             display(context.imageDataArray, (int)ImageControl.Width, (int)ImageControl.Height, context);
             resize(context);
             context.Height--;
-        }
-
-        /// <summary>
-        /// creates a bitmap image with the proper options set from the provided path
-        /// </summary>
-        /// <param name="path"></param>
-        /// <returns></returns>
-        private BitmapImage createBitmapFromFilePath(string path)
-        {
-            BitmapImage bitmap = new BitmapImage();
-            bitmap.CacheOption = BitmapCacheOption.None;
-            bitmap.UriCachePolicy = new RequestCachePolicy(RequestCacheLevel.BypassCache);
-            bitmap.CacheOption = BitmapCacheOption.OnLoad;
-            bitmap.CreateOptions = BitmapCreateOptions.IgnoreImageCache;
-            bitmap.BeginInit();
-            bitmap.UriSource = new Uri(path);
-            bitmap.EndInit();
-            return bitmap;
-        }
-
-        
-
-        /// <summary>
-        /// takes a given bitmapImage and copies it into a new byte array and returns it.
-        /// </summary>
-        /// <param name="img"></param>
-        /// <param name="injectedContext"></param>
-        /// <returns></returns>
-        public byte[] ImageToByte(BitmapImage toCopy, SeamCarvingContext injectedContext)
-        {
-            injectedContext.stride = toCopy.PixelWidth * 4;
-            int size = toCopy.PixelHeight * injectedContext.stride;
-            byte[] pixels = new byte[size];
-            toCopy.CopyPixels(pixels, injectedContext.stride, 0);
-            return pixels;
         }
 
         public void display(byte[] toDisplay, int width, int height, SeamCarvingContext injectedContext)

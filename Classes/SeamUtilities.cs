@@ -2,8 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Cache;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media.Imaging;
 
 namespace SeamCarving.Classes
 {
@@ -72,6 +74,39 @@ namespace SeamCarving.Classes
             toReturn.alpha = alphaInt;
 
             return toReturn;
+        }
+
+        /// <summary>
+        /// creates a bitmap image with the proper options set from the provided path
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        private BitmapImage createBitmapFromFilePath(string path)
+        {
+            BitmapImage bitmap = new BitmapImage();
+            bitmap.CacheOption = BitmapCacheOption.None;
+            bitmap.UriCachePolicy = new RequestCachePolicy(RequestCacheLevel.BypassCache);
+            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+            bitmap.CreateOptions = BitmapCreateOptions.IgnoreImageCache;
+            bitmap.BeginInit();
+            bitmap.UriSource = new Uri(path);
+            bitmap.EndInit();
+            return bitmap;
+        }
+
+        /// <summary>
+        /// takes a given bitmapImage and copies it into a new byte array and returns it.
+        /// </summary>
+        /// <param name="img"></param>
+        /// <param name="injectedContext"></param>
+        /// <returns></returns>
+        public byte[] ImageToByte(BitmapImage toCopy, SeamCarvingContext injectedContext)
+        {
+            injectedContext.stride = toCopy.PixelWidth * 4;
+            int size = toCopy.PixelHeight * injectedContext.stride;
+            byte[] pixels = new byte[size];
+            toCopy.CopyPixels(pixels, injectedContext.stride, 0);
+            return pixels;
         }
     }
 }
