@@ -33,6 +33,7 @@ namespace SeamCarving
         private SeamCarvingContext context;
         private ISeamUtilities seamUtilities;
         private IGradientCalculator gradientCalculator;
+        private IHeatCalculator heatCalculator;
 
         public MainWindow()
         {
@@ -44,6 +45,7 @@ namespace SeamCarving
 
             this.seamUtilities = new SeamUtilities();
             this.gradientCalculator = new GradientCalculator(seamUtilities);
+            this.heatCalculator = new HeatCalculator(seamUtilities);
         }
 
         /// <summary>
@@ -78,6 +80,7 @@ namespace SeamCarving
         {
             this.gradientCalculator.calculateGradient(context);
             display(context.gradientArray, (int)ImageControl.Width, (int)ImageControl.Height, context);
+            var test = context.gradientArray.Max();
         }
 
         /// <summary>
@@ -87,7 +90,7 @@ namespace SeamCarving
         /// <param name="e"></param>
         private void Button_Click_2(object sender, RoutedEventArgs e)
         {
-            calculateHeat(context);
+            this.heatCalculator.calculateHeat(context);
             display(context.energyArray, (int)ImageControl.Width, (int)ImageControl.Height, context);
         }
 
@@ -99,57 +102,14 @@ namespace SeamCarving
         private void Button_Click_3(object sender, RoutedEventArgs e)
         {
             this.gradientCalculator.calculateGradient(context);
-            calculateHeat(context);
+            this.heatCalculator.calculateHeat(context);
             calculateSeam(context);
             display(context.imageDataArray, (int)ImageControl.Width, (int)ImageControl.Height, context);
             resize(context);
             context.Height--;
         }
 
-        
 
-        public void calculateHeat(SeamCarvingContext injectedContext)
-        {
-            injectedContext.energyArray = injectedContext.gradientArray;
-            injectedContext.energy = new int[injectedContext.gradientArray.Length / 4];
-            for (int i = 0; i < ImageControl.Height; i++)
-            {
-                byte current = seamUtilities.getPixel(injectedContext.gradientArray, i, 0, 0, injectedContext);
-                this.seamUtilities.setIndex(injectedContext.energy, i, 0, (int)current, injectedContext);
-            }
-
-            for (int i = 1; i < ImageControl.Width - 1; i++)
-            {
-                for (int j = 0; j < ImageControl.Height; j++)
-                {
-                    if (j == 0 || j == (ImageControl.Height - 1))
-                    {
-                        this.seamUtilities.setIndex(injectedContext.energy, j, i, Int32.MaxValue, injectedContext);
-                    }
-                    else
-                    {
-                        int current = (int)seamUtilities.getPixel(injectedContext.gradientArray, j, i, 0, injectedContext);
-                        int neg = this.seamUtilities.getIndex(injectedContext.energy, j - 1, i - 1, injectedContext);
-                        int lat = this.seamUtilities.getIndex(injectedContext.energy, j, i - 1, injectedContext);
-                        int pos = this.seamUtilities.getIndex(injectedContext.energy, j + 1, i - 1, injectedContext);
-                        int least = (Math.Min(Math.Min(neg, lat), pos));
-                        int toSet = current + least;
-                        int maxVal = 255 * (int)ImageControl.Width;
-                        this.seamUtilities.setIndex(injectedContext.energy, j, i, (current + least), injectedContext);
-
-                        double ratio = (((double)toSet) / ((double)maxVal)) * 128;
-
-                        byte pixelValue = (byte)(ratio * 256);
-
-                        seamUtilities.setPixel(injectedContext.energyArray, j, i, 0, pixelValue, injectedContext);
-                        seamUtilities.setPixel(injectedContext.energyArray, j, i, 1, pixelValue, injectedContext);
-                        seamUtilities.setPixel(injectedContext.energyArray, j, i, 2, pixelValue, injectedContext);
-                    }
-                }
-            }
-        }
-
-        
 
         public void resize(SeamCarvingContext injectedContext)
         {

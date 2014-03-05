@@ -67,11 +67,13 @@
     </Compile>
     <Compile Include="Classes\FileChooser.cs" />
     <Compile Include="Classes\GradientCalculator.cs" />
+    <Compile Include="Classes\HeatCalculator.cs" />
     <Compile Include="Classes\pixel.cs" />
     <Compile Include="Classes\SeamCarvingContext.cs" />
     <Compile Include="Classes\SeamUtilities.cs" />
     <Compile Include="Interfaces\IFileChooser.cs" />
     <Compile Include="Interfaces\IGradientCalculator.cs" />
+    <Compile Include="Interfaces\IHeatCalculator.cs" />
     <Compile Include="Interfaces\ISeamUtilities.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
