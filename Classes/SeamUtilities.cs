@@ -36,5 +36,42 @@ namespace SeamCarving.Classes
             int index = (int)context.Width * 4 * x + y * 4;
             return arr[index + color];
         }
+
+        /// <summary>
+        /// given a location of a pixel (x,y), returns the info about that pixel.
+        /// </summary>
+        /// <param name="i"></param>
+        /// <param name="j"></param>
+        /// <param name="imageDataArray"></param>
+        /// <param name="injectedContext"></param>
+        /// <returns></returns>
+        public pixel getPixelInfo(int i, int j, byte[] imageDataArray, SeamCarvingContext injectedContext)
+        {
+            byte[] red = { 0, 0, 0, this.getPixel(imageDataArray, i, j, 0, injectedContext) };
+            byte[] green = { 0, 0, 0, this.getPixel(imageDataArray, i, j, 1, injectedContext) };
+            byte[] blue = { 0, 0, 0, this.getPixel(imageDataArray, i, j, 2, injectedContext) };
+            byte[] alpha = { 0, 0, 0, this.getPixel(imageDataArray, i, j, 3, injectedContext) };
+
+            if (BitConverter.IsLittleEndian)
+            {
+                Array.Reverse(red);
+                Array.Reverse(green);
+                Array.Reverse(blue);
+                Array.Reverse(alpha);
+            }
+
+            int redInt = BitConverter.ToInt32(red, 0);
+            int greenInt = BitConverter.ToInt32(green, 0);
+            int blueInt = BitConverter.ToInt32(blue, 0);
+            int alphaInt = BitConverter.ToInt32(alpha, 0);
+
+            pixel toReturn = new pixel();
+            toReturn.red = redInt;
+            toReturn.green = greenInt;
+            toReturn.blue = blueInt;
+            toReturn.alpha = alphaInt;
+
+            return toReturn;
+        }
     }
 }

@@ -32,16 +32,18 @@ namespace SeamCarving
     {
         private SeamCarvingContext context;
         private ISeamUtilities seamUtilities;
+        private IGradientCalculator gradientCalculator;
 
         public MainWindow()
         {
             InitializeComponent();
-            context = new SeamCarvingContext();
+            this.context = new SeamCarvingContext();
 
-            context.Height = ImageControl.Height;
-            context.Width = ImageControl.Width;
+            this.context.Height = ImageControl.Height;
+            this.context.Width = ImageControl.Width;
 
-            seamUtilities = new SeamUtilities();
+            this.seamUtilities = new SeamUtilities();
+            this.gradientCalculator = new GradientCalculator(seamUtilities);
         }
 
         /// <summary>
@@ -74,7 +76,7 @@ namespace SeamCarving
         /// <param name="e"></param>
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            calculateGradient(context);
+            this.gradientCalculator.calculateGradient(context);
             display(context.gradientArray, (int)ImageControl.Width, (int)ImageControl.Height, context);
         }
 
@@ -96,14 +98,12 @@ namespace SeamCarving
         /// <param name="e"></param>
         private void Button_Click_3(object sender, RoutedEventArgs e)
         {
-            //for (int i = 0; i < 3; i++)
-            //{
-            calculateGradient(context);
+            this.gradientCalculator.calculateGradient(context);
             calculateHeat(context);
             calculateSeam(context);
             display(context.imageDataArray, (int)ImageControl.Width, (int)ImageControl.Height, context);
             resize(context);
-            //}
+            context.Height--;
         }
 
         /// <summary>
@@ -124,42 +124,7 @@ namespace SeamCarving
             return bitmap;
         }
 
-        /// <summary>
-        /// given a seam carving context, calculates the gradient of every pixel.
-        /// </summary>
-        /// <param name="injectedContext"></param>
-        public void calculateGradient(SeamCarvingContext injectedContext)
-        {
-            injectedContext.gradientArray = new byte[injectedContext.imageDataArray.Length];
-            for (int i = 1; i < ImageControl.Height - 1; i++)
-            {
-                for (int j = 1; j < ImageControl.Width - 1; j++)
-                {
-                    pixel last = getPixelInfo(i, j - 1, injectedContext.imageDataArray, injectedContext);
-                    pixel current = getPixelInfo(i, j, injectedContext.imageDataArray, injectedContext);
-                    pixel next = getPixelInfo(i, j + 1, injectedContext.imageDataArray, injectedContext);
-
-                    byte gradient = calculateGradientOfPixel(last, current, next);
-
-                    seamUtilities.setPixel(injectedContext.gradientArray, i, j, 0, gradient, context);
-                    seamUtilities.setPixel(injectedContext.gradientArray, i, j, 1, gradient, context);
-                    seamUtilities.setPixel(injectedContext.gradientArray, i, j, 2, gradient, context);
-                    seamUtilities.setPixel(injectedContext.gradientArray, i, j, 3, 0xff, context);
-                }
-            }
-        }
-
-        /// <summary>
-        /// takes three pixels and calculates the current pixels difference from the pixels next to it.
-        /// </summary>
-        /// <param name="last"></param>
-        /// <param name="current"></param>
-        /// <param name="next"></param>
-        /// <returns></returns>
-        public byte calculateGradientOfPixel(pixel last, pixel current, pixel next)
-        {
-            return (byte)((((current.red - next.red + 1) * (current.blue - next.blue + 1) * (current.green - next.green + 1)) + last.red) / 128);
-        }
+        
 
         /// <summary>
         /// takes a given bitmapImage and copies it into a new byte array and returns it.
@@ -203,34 +168,7 @@ namespace SeamCarving
 
         }
 
-        public pixel getPixelInfo(int i, int j, byte[] imageDataArray, SeamCarvingContext injectedContext)
-        {
-                    byte[] red = {0,0,0, seamUtilities.getPixel(imageDataArray, i, j, 0, injectedContext)};
-                    byte[] green = {0,0,0, seamUtilities.getPixel(imageDataArray, i, j, 1, injectedContext)};
-                    byte[] blue = {0,0,0, seamUtilities.getPixel(imageDataArray, i, j, 2, injectedContext)};
-                    byte[] alpha = {0,0,0, seamUtilities.getPixel(imageDataArray, i, j, 3, injectedContext)};
-
-                    if (BitConverter.IsLittleEndian)
-                    {
-                        Array.Reverse(red);
-                        Array.Reverse(green);
-                        Array.Reverse(blue);
-                        Array.Reverse(alpha);
-                    }
-
-                    int redInt = BitConverter.ToInt32(red, 0);
-                    int greenInt = BitConverter.ToInt32(green, 0);
-                    int blueInt = BitConverter.ToInt32(blue, 0);
-                    int alphaInt = BitConverter.ToInt32(alpha, 0);
-
-                    pixel toReturn =  new pixel();
-                    toReturn.red = redInt;
-                    toReturn.green = greenInt;
-                    toReturn.blue = blueInt;
-                    toReturn.alpha = alphaInt;
-
-                    return toReturn;
-        }
+        
 
         public void calculateHeat(SeamCarvingContext injectedContext)
         {
@@ -284,8 +222,6 @@ namespace SeamCarving
             int index = x * (int)ImageControl.Width + y;
             return arr[index];
         }
-
-        
 
         public void resize(SeamCarvingContext injectedContext)
         {
