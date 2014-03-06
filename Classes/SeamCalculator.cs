@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SeamCarving.Classes
 {
-    class SeamCalculator : ISeamCalculator
+    public class SeamCalculator : ISeamCalculator
     {
         #region class variables
         /// <summary>

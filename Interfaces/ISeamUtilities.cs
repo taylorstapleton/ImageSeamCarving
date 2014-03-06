@@ -8,7 +8,7 @@ using System.Windows.Media.Imaging;
 
 namespace SeamCarving.Interfaces
 {
-    interface ISeamUtilities
+    public interface ISeamUtilities
     {
         void setPixel(byte[] arr, int x, int y, int color, byte toSet, SeamCarvingContext context);
 
