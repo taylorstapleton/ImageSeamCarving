@@ -54,7 +54,6 @@
   </Choose>
   <ItemGroup>
     <Compile Include="TestOf_GradientCalculator.cs" />
-    <Compile Include="TestOf_SeamCalculator.cs" />
     <Compile Include="TestOf_HeatCalculator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
